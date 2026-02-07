@@ -1,0 +1,215 @@
+{
+  "steps": [
+    {
+      "step_id": 1,
+      "statement": "Verify the Database Mode and Role on Primary & DR Nodes",
+      "syntax": [
+        "select name, open_mode, database_role from v$database;"
+      ],
+      "output": [
+        "On Primary: - Mode - READ WRITE, ROLE – PRIMARY",
+        "On Standby: - Mode – MOUNTED, ROLE – STANDBY"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 2,
+      "statement": "Verify the Job Status on Primary Node",
+      "syntax": [
+        "select name, value from v$parameter where name='job_queue_processes';"
+      ],
+      "output": [
+        "0"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 3,
+      "statement": "Verify the Log Sequence Number on Primary & DR Node",
+      "syntax": [
+        "select thread#, max(sequence#) from v$log_history group by thread#;"
+      ],
+      "output": [
+        "Success"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 4,
+      "statement": "Switch the log on database on Primary Node (If Available)",
+      "syntax": [
+        "alter system switch logfile;"
+      ],
+      "output": [
+        "System altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 5,
+      "statement": "Shut down the database on Primary Node (If Available)",
+      "syntax": [
+        "shutdown immediate;"
+      ],
+      "output": [
+        "ORACLE instance shut down"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 6,
+      "statement": "Switch the log on database on Primary Node1",
+      "syntax": [
+        "alter system switch logfile;"
+      ],
+      "output": [
+        "System altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 7,
+      "statement": "Verify the Log Sequence Number on Primary & DR Node",
+      "syntax": [
+        "select thread#, max(sequence#) from v$log_history group by thread#;"
+      ],
+      "output": [
+        "Success"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 8,
+      "statement": "Verify the Switchover status for database is TO_STANDBY or SESSIONS ACTIVE on Primary Node1",
+      "syntax": [
+        "select switchover_status from v$database;"
+      ],
+      "output": [
+        "TO_STANDBY"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 9,
+      "statement": "Switch the role of the Database from Primary to Standby on Primary Node",
+      "syntax": [
+        "alter database commit"
+      ],
+      "output": [
+        "Database altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 10,
+      "statement": "Start the database in mount state on the New DR Node",
+      "syntax": [
+        "startup mount"
+      ],
+      "output": [
+        "Database mounted"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 11,
+      "statement": "Verify the Switchover status for database is TO_PRIMARY or SESSIONS ACTIVE on Original DR Node",
+      "syntax": [
+        "select switchover_status from v$database"
+      ],
+      "output": [
+        "TO_PRIMARY"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 12,
+      "statement": "Switch the role of the Database from Standby to Primary on Original DR Node",
+      "syntax": [
+        "alter database commit to switchover to primary"
+      ],
+      "output": [
+        "Database altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 13,
+      "statement": "Shutdown the database post switching the role from Standby to Primary on Original DR Node",
+      "syntax": [
+        "shutdown immediate"
+      ],
+      "output": [
+        "ORACLE instance shut down"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 14,
+      "statement": "Start the database in Read Write mode on New Primary Node",
+      "syntax": [
+        "startup"
+      ],
+      "output": [
+        "Database opened"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 15,
+      "statement": "Start the database in standby mode on New DR Node (If Available)",
+      "syntax": [
+        "startup mount"
+      ],
+      "output": [
+        "Database mounted"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 16,
+      "statement": "Verify the Database Mode and Role on DR & Primary & Nodes post Switchover",
+      "syntax": [
+        "select name, open_mode, database_role from v$database"
+      ],
+      "output": [
+        "On New Primary: - Mode - READ WRITE, ROLE – PRIMARY",
+        "On New Standby: -  Mode – MOUNTED, ROLE - STANDBY"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 17,
+      "statement": "Switch the log on database on New Primary Node 1 alter system switch logfile;",
+      "syntax": [
+        "alter system switch logfile;"
+      ],
+      "output": [
+        "System altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 18,
+      "statement": "Start the recovery for database from DR to Primary on New DR Node alter database recover managed standby database disconnect from session;",
+      "syntax": [
+        "alter database recover managed standby database disconnect from session;"
+      ],
+      "output": [
+        "Database altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 19,
+      "statement": "Verify the Log Sequence Number on New DR & Primary Nodes select thread#, max(sequence#) from v$log_history group by thread#;",
+      "syntax": [
+        "select thread#, max(sequence#) from v$log_history group by thread#;"
+      ],
+      "output": [
+        "Success"
+      ],
+      "confidence": "explicit"
+    }
+  ]
+}
