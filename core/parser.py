@@ -1,6 +1,6 @@
 import json
 import re
-
+from typing import Optional
 
 from schemas.step_schema import DocumentExtraction
 from prompts.step_extraction_prompt import build_step_extraction_prompt
