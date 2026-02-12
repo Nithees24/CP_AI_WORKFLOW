@@ -33,13 +33,13 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 #
 # Recommended:
 #   - "llama3:latest"
-#   - "llama3:8b"
+#   - "llama3:8b"hi
 #
 # DO NOT use:
 #   - "llama3.2"
 #   - "llama3.2:3b"
 #
-LLM_MODEL = "llama3.1:8b"
+LLM_MODEL = "llama3:latest"
 
 OLLAMA_BASE_URL = "http://localhost:11434"
 
