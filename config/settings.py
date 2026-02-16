@@ -39,7 +39,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 #   - "llama3.2"
 #   - "llama3.2:3b"
 #
-LLM_MODEL = "llama3:latest"
+LLM_MODEL = "llama3.2:3b"
 
 OLLAMA_BASE_URL = "http://localhost:11434"
 
