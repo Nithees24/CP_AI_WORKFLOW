@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # ------------------------------------------------------------------
 # PROJECT ROOT
@@ -26,22 +27,19 @@ PROCESSED_TEXT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ------------------------------------------------------------------
-# LLM (OLLAMA) SETTINGS
+# CLOUD LLM API SETTINGS
 # ------------------------------------------------------------------
-# IMPORTANT:
-# Use ONLY model names that appear in `ollama list`
+# This workflow is now designed for cloud-hosted LLM APIs.
+# Configure credentials using environment variables.
 #
-# Recommended:
-#   - "llama3:latest"
-#   - "llama3:8b"hi
-#
-# DO NOT use:
-#   - "llama3.2"
-#   - "llama3.2:3b"
-#
-LLM_MODEL = "llama3.2:3b"
+# Examples:
+#   export LLM_API_KEY="<your-api-key>"
+#   export LLM_BASE_URL="https://api.openai.com/v1"
+#   export LLM_MODEL="gpt-4o-mini"
 
-OLLAMA_BASE_URL = "http://localhost:11434"
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 
 LLM_TEMPERATURE = 0.0
 LLM_TIMEOUT = 120  # seconds

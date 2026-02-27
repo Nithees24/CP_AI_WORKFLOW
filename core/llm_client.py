@@ -8,34 +8,52 @@ class BaseLLMClient(ABC):
         raise NotImplementedError
 
 
-class OllamaLLMClient(BaseLLMClient):
+class CloudLLMClient(BaseLLMClient):
     """
-    Ollama LLM client using OpenAI-compatible API.
-    Works with Llama 3 / Llama 3.x models.
+    Cloud LLM client using OpenAI-compatible chat completions API.
     """
 
-    def __init__(self,model,base_url,temperature,timeout: int = 120):
+    def __init__(self, model: str, base_url: str, api_key: str, temperature: float, timeout: int = 120):
         self.model = model
         self.base_url = base_url.rstrip("/")
+        self.api_key = api_key
         self.temperature = temperature
         self.timeout = timeout
 
-
-#this portion process the page chunk with the prompt and give back the solution
     def generate(self, prompt: str) -> str:
+        if not self.api_key:
+            raise ValueError(
+                "LLM_API_KEY is not set. Please export LLM_API_KEY before running the pipeline."
+            )
+
         response = requests.post(
-            f"{self.base_url}/api/generate",
-            json={
-                "model": self.model,  # llama3:latest
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": self.temperature
-                }
+            f"{self.base_url}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
             },
-            timeout=self.timeout
+            json={
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": "You are a strict JSON extraction engine."},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": self.temperature,
+            },
+            timeout=self.timeout,
         )
 
         response.raise_for_status()
         data = response.json()
-        return data["response"].strip()
+
+        content = (
+            data.get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "")
+            .strip()
+        )
+
+        if not content:
+            raise ValueError("Cloud LLM returned empty content")
+
+        return content

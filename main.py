@@ -16,7 +16,7 @@ from core.extractor import extract_lines_from_pdf
 from core.normalizer import normalize_text
 from core.chunker import chunk_text
 from core.parser import StepParser, LLMParserError
-from core.llm_client import OllamaLLMClient
+from core.llm_client import CloudLLMClient
 
 from config.settings import (
     INPUT_FILE,
@@ -28,7 +28,10 @@ from config.settings import (
     CHUNK_OVERLAP,
     MAX_LLM_RETRIES,
     LLM_MODEL,
-    OLLAMA_BASE_URL,
+    LLM_BASE_URL,
+    LLM_API_KEY,
+    LLM_TEMPERATURE,
+    LLM_TIMEOUT,
 )
 
 # ------------------------------------------------------------------
@@ -85,10 +88,12 @@ def main():
     # --------------------------------------------------------------
     # 4. Initialize LLM + Parser
     # --------------------------------------------------------------
-    llm_client = OllamaLLMClient(
+    llm_client = CloudLLMClient(
         model=LLM_MODEL,
-        base_url=OLLAMA_BASE_URL,
-        temperature=0.0
+        base_url=LLM_BASE_URL,
+        api_key=LLM_API_KEY,
+        temperature=LLM_TEMPERATURE,
+        timeout=LLM_TIMEOUT
     )
 
     parser = StepParser(
