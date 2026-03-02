@@ -41,13 +41,15 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 #   - "llama3.2:3b"
 #
 # existing ollama settings (already there)
+USE_API_LLM = True
+
 LLM_MODEL       = "llama3.2:3b"
 OLLAMA_BASE_URL = "http://localhost:11434"
 LLM_TEMPERATURE = 0.2
 LLM_TIMEOUT     = 120
 
 # SWITCH FOR LLM AND CLOUD BASED LLM CALLING
-USE_API_LLM = True
+
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL       = "gemini-2.5-flash"
