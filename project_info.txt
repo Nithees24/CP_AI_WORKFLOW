@@ -1,0 +1,51 @@
+PROGRAM ARCHITECTURE:
+
+
+input.pdf
+   ↓
+[extractor.py]        → Pulls raw lines from PDF (using PyMuPDF / fitz)
+   ↓
+[normalizer.py]       → Cleans text (fixes line breaks, bullets, etc.)
+   ↓
+[chunker.py]          → Splits text into page-based chunks
+   ↓
+[llm_client.py]       → Sends each chunk to LOCAL Ollama (HTTP POST to localhost)
+   ↓
+[parser.py]           → Parses LLM JSON response → validates into Pydantic schema
+   ↓
+[validator.py]        → Semantic checks on extracted steps
+   ↓
+output.json           → Final structured steps (statement, syntax, output)
+
+
+
+LLM Call:
+config/settings.py
+   ↓
+USE_API_LLM = True / False   ← single flag controls everything
+   ↓
+        ┌─────────────────────────────┐
+        │         new_main.py         │
+        │                             │
+        │  if USE_API_LLM:            │
+        │      GeminiLLMClient()  ────┼──→ Google Gemini API (cloud)
+        │  else:                      │
+        │      OllamaLLMClient()  ────┼──→ Ollama (local)
+        └─────────────────────────────┘
+                    ↓
+             parser.py 
+             validator.py 
+
+
+BaseLLMClient          ← Parent (the contract)
+        /           \
+       /             \
+OllamaLLMClient   GeminiLLMClient
+(Local child)     (API child)
+
+
+THE API KEY IS STORED IN .ENV FILE WITHOUT HARDCODING 
+
+.env file                settings.py
+    ↓                        ↓
+GEMINI_API_KEY=key  →  load_dotenv()  →  os.getenv("GEMINI_API_KEY")  →  "key"
