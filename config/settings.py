@@ -1,9 +1,12 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # ------------------------------------------------------------------
 # PROJECT ROOT
 # ------------------------------------------------------------------
 # D:\CP_AI_WORKFLOW
+load_dotenv()
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # ------------------------------------------------------------------
@@ -17,7 +20,7 @@ PROCESSED_TEXT_DIR = DATA_DIR / "processed_text"
 
 OUTPUT_DIR = PROJECT_ROOT / "output"
 OUTPUT_FILE = OUTPUT_DIR / "structured_output.json"
-
+OUTPUT_FILE_API = OUTPUT_DIR / "structured_output_api.json"
 # ------------------------------------------------------------------
 # CREATE DIRECTORIES (SAFE)
 # ------------------------------------------------------------------
@@ -28,8 +31,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # ------------------------------------------------------------------
 # LLM (OLLAMA) SETTINGS
 # ------------------------------------------------------------------
-# IMPORTANT:
-# Use ONLY model names that appear in `ollama list`
 #
 # Recommended:
 #   - "llama3:latest"
@@ -39,12 +40,18 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 #   - "llama3.2"
 #   - "llama3.2:3b"
 #
-LLM_MODEL = "llama3.2:3b"
-
+# existing ollama settings (already there)
+LLM_MODEL       = "llama3.2:3b"
 OLLAMA_BASE_URL = "http://localhost:11434"
+LLM_TEMPERATURE = 0.2
+LLM_TIMEOUT     = 120
 
-LLM_TEMPERATURE = 0.0
-LLM_TIMEOUT = 120  # seconds
+# SWITCH FOR LLM AND CLOUD BASED LLM CALLING
+USE_API_LLM = False
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL       = "gemini-2.5-flash"
+GEMINI_TEMPERATURE = 0.2
 
 # ------------------------------------------------------------------
 # PIPELINE SETTINGS

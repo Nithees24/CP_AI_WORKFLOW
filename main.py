@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 import json
-
+import time
 # ------------------------------------------------------------------
 # Ensure project root is in PYTHONPATH
 # ------------------------------------------------------------------
@@ -14,25 +14,31 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from core.extractor import extract_lines_from_pdf
 from core.normalizer import normalize_text
 from core.parser import StepParser, LLMParserError
-from core.llm_client import OllamaLLMClient
+from core.llm_client import OllamaLLMClient,GeminiLLMClient
 
 from config.settings import (
     INPUT_FILE,
     RAW_TEXT_DIR,
     PROCESSED_TEXT_DIR,
     OUTPUT_FILE,
+    OUTPUT_FILE_API,
     SAVE_ARTIFACTS,
     MAX_LLM_RETRIES,
     LLM_MODEL,
     OLLAMA_BASE_URL,
     LLM_TEMPERATURE,
     LLM_TIMEOUT,
+    USE_API_LLM,
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    GEMINI_TEMPERATURE,
 )
 
 # ------------------------------------------------------------------
 # Main Pipeline
 # ------------------------------------------------------------------
 def main():
+    start=time.time()
     print("CP-AI-WORKFLOW started")
 
     # --------------------------------------------------------------
@@ -112,13 +118,13 @@ def main():
     # --------------------------------------------------------------
     # 4. Initialize LLM + Parser
     # --------------------------------------------------------------
-    llm_client = OllamaLLMClient(
-        model=LLM_MODEL,
-        base_url=OLLAMA_BASE_URL,
-        temperature=LLM_TEMPERATURE,
-        timeout=LLM_TIMEOUT
-    )
 
+    if USE_API_LLM:
+        print("Using Gemini API")
+        llm_client = GeminiLLMClient(GEMINI_MODEL, GEMINI_API_KEY, GEMINI_TEMPERATURE)
+    else:
+        print("Using Ollama Local")
+        llm_client = OllamaLLMClient(LLM_MODEL, OLLAMA_BASE_URL, LLM_TEMPERATURE, LLM_TIMEOUT)
     parser = StepParser(
         llm_client=llm_client,
         max_retries=MAX_LLM_RETRIES
@@ -159,19 +165,33 @@ def main():
     # 6. Save output
     # --------------------------------------------------------------
     print("Saving structured output...")
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-
-    OUTPUT_FILE.write_text(
-        json.dumps(
-            {"steps": [s.model_dump() for s in all_steps]},
-            indent=2,
-            ensure_ascii=False
-        ),
-        encoding="utf-8"
-    )
-
+    if USE_API_LLM:
+        OUTPUT_FILE_API.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT_FILE_API.write_text(
+            json.dumps(
+                {"steps": [s.model_dump() for s in all_steps]},
+                indent=2,
+                ensure_ascii=False
+            ),
+            encoding="utf-8"
+        )
+    else:
+        OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT_FILE.write_text(
+            json.dumps(
+                {"steps": [s.model_dump() for s in all_steps]},
+                indent=2,
+                ensure_ascii=False
+            ),
+            encoding="utf-8"
+        )
     print("Pipeline completed successfully")
+    if USE_API_LLM:
+        print(f"Output written to: {OUTPUT_FILE_API}")
     print(f"Output written to: {OUTPUT_FILE}")
+    time.sleep(1)
+    end = time.time()
+    print(f"Total runtime of the program is {end - start} seconds")
 
 
 if __name__ == "__main__":
