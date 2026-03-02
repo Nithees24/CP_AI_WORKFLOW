@@ -188,7 +188,8 @@ def main():
     print("Pipeline completed successfully")
     if USE_API_LLM:
         print(f"Output written to: {OUTPUT_FILE_API}")
-    print(f"Output written to: {OUTPUT_FILE}")
+    else:
+        print(f"Output written to: {OUTPUT_FILE}")
     time.sleep(1)
     end = time.time()
     print(f"Total runtime of the program is {end - start} seconds")
