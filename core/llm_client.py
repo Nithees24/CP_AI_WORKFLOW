@@ -1,6 +1,7 @@
 import requests
 from abc import ABC, abstractmethod
 import google.genai as genai
+from google.genai import types
 
 # 1. PARENT CLASS
 class BaseLLMClient(ABC):
@@ -46,5 +47,9 @@ class GeminiLLMClient(BaseLLMClient):
         self.client = genai.Client(api_key=self.api_key)
 
     def generate(self, prompt: str) -> str:
-        response = self.client.models.generate_content(model=self.model, contents=prompt)
+        # response = client.models.generate_content(
+        #     model="gemini-3-flash-preview",
+        #     contents="Explain how AI works in a few words",
+        # )
+        response = self.client.models.generate_content(model=self.model, contents=prompt,config=types.GenerateContentConfig(temperature=self.temperature))
         return response.text.strip()
