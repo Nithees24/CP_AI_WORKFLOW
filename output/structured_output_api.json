@@ -177,6 +177,39 @@
         "On New Standby: - Mode – MOUNTED, ROLE - STANDBY"
       ],
       "confidence": "explicit"
+    },
+    {
+      "step_id": 17,
+      "statement": "Switch the log on database on New Primary Node 1",
+      "syntax": [
+        "alter system switch logfile;"
+      ],
+      "output": [
+        "System altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 18,
+      "statement": "Start the recovery for database from DR to Primary on New DR Node",
+      "syntax": [
+        "alter database recover managed standby database disconnect from session;"
+      ],
+      "output": [
+        "Database altered"
+      ],
+      "confidence": "explicit"
+    },
+    {
+      "step_id": 19,
+      "statement": "Verify the Log Sequence Number on New DR & Primary Nodes",
+      "syntax": [
+        "select thread#, max(sequence#) from v$log_history group by thread#;"
+      ],
+      "output": [
+        "Success"
+      ],
+      "confidence": "explicit"
     }
   ]
 }
