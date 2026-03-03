@@ -72,7 +72,7 @@ class StepParser:
                 )
 
     @staticmethod
-    def _tighten_prompt(prompt: str, attempt: int) -> str:
+    def _tighten_prompt(prompt: str) -> str:
         return f"""
 {prompt}
 

@@ -49,7 +49,6 @@ class GeminiLLMClient(BaseLLMClient):
     def generate(self, prompt: str) -> str:
         # response = client.models.generate_content(
         #     model="gemini-3-flash-preview",
-        #     contents="Explain how AI works in a few words",
-        # )
+        #     contents="Explain how AI works in a few words"
         response = self.client.models.generate_content(model=self.model, contents=prompt,config=types.GenerateContentConfig(temperature=self.temperature))
         return response.text.strip()
