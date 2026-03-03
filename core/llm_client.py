@@ -1,7 +1,8 @@
-import requests
 from abc import ABC, abstractmethod
+from langchain_ollama import OllamaLLM  # LangChain's Ollama wrapper
 import google.genai as genai
 from google.genai import types
+
 
 # 1. PARENT CLASS
 class BaseLLMClient(ABC):
@@ -9,7 +10,8 @@ class BaseLLMClient(ABC):
     def generate(self, prompt: str) -> str:
         raise NotImplementedError
 
-# 2. LOCAL CHILD CLASS (unchanged)
+
+# 2. LOCAL CHILD CLASS — now using LangChain wrapper
 class OllamaLLMClient(BaseLLMClient):
 
     def __init__(self, model, base_url, temperature, timeout: int = 120):
@@ -18,37 +20,30 @@ class OllamaLLMClient(BaseLLMClient):
         self.temperature = temperature
         self.timeout = timeout
 
-    #Local LLM Call
-    def generate(self, prompt: str) -> str:
-        response = requests.post(
-            f"{self.base_url}/api/generate",
-            json={
-                "model": self.model,  # llama3:latest
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": self.temperature
-                }
-            },
-            timeout=self.timeout
+        # LangChain OllamaLLM replaces the manual requests.post call
+        self._llm = OllamaLLM(
+            model=self.model,
+            base_url=self.base_url,
+            temperature=self.temperature,
         )
 
-        response.raise_for_status()
-        data = response.json()
-        return data["response"].strip()
+    def generate(self, prompt: str) -> str:
+        response = self._llm.invoke(prompt)
+        return response.strip()
 
-# 3. API CHILD CLASS
+
+# 3. API CHILD CLASS (unchanged)
 class GeminiLLMClient(BaseLLMClient):
     def __init__(self, model, api_key, temperature):
         self.model = model
         self.api_key = api_key
         self.temperature = temperature
-
         self.client = genai.Client(api_key=self.api_key)
 
     def generate(self, prompt: str) -> str:
-        # response = client.models.generate_content(
-        #     model="gemini-3-flash-preview",
-        #     contents="Explain how AI works in a few words"
-        response = self.client.models.generate_content(model=self.model, contents=prompt,config=types.GenerateContentConfig(temperature=self.temperature))
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config=types.GenerateContentConfig(temperature=self.temperature)
+        )
         return response.text.strip()
